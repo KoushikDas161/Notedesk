@@ -5,42 +5,102 @@
    ========================================================= */
 
 const express = require("express");
-const { getNotes, getUsers } = require("../data/db");
+const { supabase, mapUserFields, mapNoteFields } = require("../data/db");
 const { requireAuth } = require("../middleware/auth");
 
 const router = express.Router();
 
-router.get("/", requireAuth, (req, res) => {
-  const notes = getNotes();
-  const users = getUsers();
-  const user = users.find(u => u.id === req.session.userId);
+router.get("/", requireAuth, async (req, res, next) => {
+  try {
+    const { data: dbUser, error: userError } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", req.session.userId)
+      .single();
 
-  const uploaded = notes.filter(n => n.authorId === user.id);
-  const saved = user.savedNoteIds.map(id => notes.find(n => n.id === id)).filter(Boolean);
-  const recent = user.recentNoteIds.map(id => notes.find(n => n.id === id)).filter(Boolean);
+    if (userError) return next(userError);
+    const user = mapUserFields(dbUser);
 
-  const interestSubjects = [...new Set([...saved, ...recent].map(n => n.subject))];
-  const excludeIds = new Set([...saved.map(n => n.id), ...uploaded.map(n => n.id)]);
-  let recommended = notes.filter(n => interestSubjects.includes(n.subject) && !excludeIds.has(n.id));
-  if (!recommended.length){
-    recommended = [...notes].sort((a, b) => b.views - a.views).slice(0, 4);
+    // Fetch uploads
+    const { data: uploadedDb, error: uploadsError } = await supabase
+      .from("notes")
+      .select("*")
+      .eq("author_id", user.id);
+
+    if (uploadsError) return next(uploadsError);
+    const uploaded = (uploadedDb || []).map(n => mapNoteFields(n, user));
+
+    // Fetch saved notes (handle empty array gracefully)
+    let savedDb = [];
+    if (user.savedNoteIds && user.savedNoteIds.length) {
+      const { data, error } = await supabase
+        .from("notes")
+        .select("*")
+        .in("id", user.savedNoteIds);
+      if (error) return next(error);
+      savedDb = data || [];
+    }
+    const saved = (savedDb || []).map(n => mapNoteFields(n, user));
+
+    // Fetch recently viewed (handle empty array gracefully, preserve order)
+    let recentDb = [];
+    if (user.recentNoteIds && user.recentNoteIds.length) {
+      const { data, error } = await supabase
+        .from("notes")
+        .select("*")
+        .in("id", user.recentNoteIds);
+      if (error) return next(error);
+      recentDb = data || [];
+    }
+    const recentMapped = user.recentNoteIds
+      .map(id => recentDb.find(n => n.id === id))
+      .filter(Boolean)
+      .map(n => mapNoteFields(n, user));
+
+    // Recommendations
+    const interestSubjects = [...new Set([...saved, ...recentMapped].map(n => n.subject))];
+    const excludeIds = new Set([...saved.map(n => n.id), ...uploaded.map(n => n.id)]);
+    
+    let recommendedDb = [];
+    if (interestSubjects.length) {
+      const { data, error } = await supabase
+        .from("notes")
+        .select("*")
+        .in("subject", interestSubjects);
+      if (error) return next(error);
+      recommendedDb = data || [];
+    }
+
+    let recommended = recommendedDb
+      .filter(n => !excludeIds.has(n.id))
+      .slice(0, 4)
+      .map(n => mapNoteFields(n, user));
+
+    if (!recommended.length) {
+      const { data, error } = await supabase
+        .from("notes")
+        .select("*")
+        .order("views", { ascending: false })
+        .limit(4);
+      if (error) return next(error);
+      recommended = (data || []).map(n => mapNoteFields(n, user));
+    }
+
+    res.json({
+      stats: {
+        uploads: uploaded.length,
+        saved: saved.length,
+        recent: recentMapped.length,
+        viewsOnUploads: uploaded.reduce((sum, n) => sum + (n.views || 0), 0)
+      },
+      uploaded,
+      saved,
+      recent: recentMapped,
+      recommended
+    });
+  } catch (err) {
+    next(err);
   }
-  recommended = recommended.slice(0, 4);
-
-  const withSaved = (list) => list.map(n => ({ ...n, saved: user.savedNoteIds.includes(n.id) }));
-
-  res.json({
-    stats: {
-      uploads: uploaded.length,
-      saved: saved.length,
-      recent: recent.length,
-      viewsOnUploads: uploaded.reduce((sum, n) => sum + (n.views || 0), 0)
-    },
-    uploaded: withSaved(uploaded),
-    saved: withSaved(saved),
-    recent: withSaved(recent),
-    recommended: withSaved(recommended)
-  });
 });
 
 module.exports = router;

@@ -5,7 +5,7 @@
 
 const express = require("express");
 const bcrypt = require("bcryptjs");
-const { getUsers, saveUsers } = require("../data/db");
+const { supabase, mapUserFields } = require("../data/db");
 
 const router = express.Router();
 
@@ -22,24 +22,32 @@ router.post("/register", async (req, res, next) => {
     if (!email || !/\S+@\S+\.\S+/.test(email)) return res.status(400).json({ error: "A valid email is required." });
     if (!password || password.length < 6) return res.status(400).json({ error: "Password must be at least 6 characters." });
 
-    const users = getUsers();
-    if (users.some(u => u.email.toLowerCase() === email.toLowerCase())){
+    const { data: existingUser, error: checkError } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", email.toLowerCase())
+      .maybeSingle();
+
+    if (checkError) return next(checkError);
+    if (existingUser){
       return res.status(409).json({ error: "An account with that email already exists." });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const user = {
+    const userObj = {
       id: "u" + Date.now(),
       name: name.trim(),
-      email: email.trim(),
-      passwordHash,
-      savedNoteIds: [],
-      recentNoteIds: [],
-      createdAt: new Date().toISOString()
+      email: email.trim().toLowerCase(),
+      password_hash: passwordHash,
+      saved_note_ids: [],
+      recent_note_ids: [],
+      created_at: new Date().toISOString()
     };
 
-    users.push(user);
-    await saveUsers(users);
+    const { error: insertError } = await supabase.from("users").insert(userObj);
+    if (insertError) return next(insertError);
+
+    const user = mapUserFields(userObj);
 
     req.session.userId = user.id;
     req.session.save((err) => {
@@ -56,8 +64,14 @@ router.post("/login", async (req, res, next) => {
     const { email, password } = req.body || {};
     if (!email || !password) return res.status(400).json({ error: "Email and password are required." });
 
-    const users = getUsers();
-    const user = users.find(u => u.email.toLowerCase() === (email || "").toLowerCase());
+    const { data: dbUser, error: queryError } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", email.toLowerCase())
+      .maybeSingle();
+
+    if (queryError) return next(queryError);
+    const user = mapUserFields(dbUser);
     if (!user) return res.status(401).json({ error: "No account found with that email." });
 
     const match = await bcrypt.compare(password, user.passwordHash);
@@ -82,15 +96,21 @@ router.post("/logout", (req, res, next) => {
   });
 });
 
-router.get("/me", (req, res) => {
+router.get("/me", async (req, res) => {
   if (!req.session || !req.session.userId) return res.json(null);
-  const users = getUsers();
-  const user = users.find(u => u.id === req.session.userId);
-  if (!user){
+  
+  const { data: dbUser, error: queryError } = await supabase
+    .from("users")
+    .select("*")
+    .eq("id", req.session.userId)
+    .maybeSingle();
+
+  if (queryError || !dbUser){
     req.session.destroy(() => {});
     return res.json(null);
   }
-  res.json(sanitizeUser(user));
+  
+  res.json(sanitizeUser(mapUserFields(dbUser)));
 });
 
 module.exports = router;

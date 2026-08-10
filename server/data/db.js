@@ -1,38 +1,60 @@
 /* =========================================================
-   DB.JS — minimal file-based persistence layer
-   Stands in for a real database (Postgres/Mongo/etc). Every
-   function here has a name that maps 1:1 to what a real ORM
-   call would look like, so swapping this out later is a
-   matter of changing this one file, not the routes.
+   DB.JS — Supabase persistence layer
+   Stands in for a real database (Supabase). Connects using the
+   service_role key to bypass RLS for server-side operations.
    ========================================================= */
 
-const fs = require("fs");
-const path = require("path");
+require("dotenv").config();
+const { createClient } = require("@supabase/supabase-js");
 
-const NOTES_FILE = path.join(__dirname, "notes.json");
-const USERS_FILE = path.join(__dirname, "users.json");
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-let writeChain = Promise.resolve();
-function queueWrite(fn){
-  writeChain = writeChain.then(fn, fn);
-  return writeChain;
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error("WARNING: Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables!");
 }
 
-function readJSON(file){
-  const raw = fs.readFileSync(file, "utf-8");
-  return raw.trim() ? JSON.parse(raw) : [];
+const supabase = createClient(supabaseUrl || "", supabaseServiceKey || "");
+
+// ---------- Helpers for Field Mapping ----------
+
+function mapUserFields(u) {
+  if (!u) return null;
+  return {
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    passwordHash: u.password_hash,
+    savedNoteIds: u.saved_note_ids || [],
+    recentNoteIds: u.recent_note_ids || [],
+    createdAt: u.created_at
+  };
 }
 
-function writeJSON(file, data){
-  return queueWrite(() =>
-    fs.promises.writeFile(file, JSON.stringify(data, null, 2), "utf-8")
-  );
+function mapNoteFields(n, currentUser = null) {
+  if (!n) return null;
+  return {
+    id: n.id,
+    title: n.title,
+    subject: n.subject,
+    course: n.course,
+    category: n.category,
+    type: n.type,
+    tags: n.tags || [],
+    authorId: n.author_id,
+    authorName: n.author_name,
+    date: n.date,
+    views: n.views,
+    downloads: n.downloads,
+    description: n.description,
+    filename: n.filename,
+    originalName: n.original_name,
+    saved: !!(currentUser && currentUser.savedNoteIds && currentUser.savedNoteIds.includes(n.id))
+  };
 }
 
-function getNotes(){ return readJSON(NOTES_FILE); }
-async function saveNotes(notes){ await writeJSON(NOTES_FILE, notes); }
-
-function getUsers(){ return readJSON(USERS_FILE); }
-async function saveUsers(users){ await writeJSON(USERS_FILE, users); }
-
-module.exports = { getNotes, saveNotes, getUsers, saveUsers };
+module.exports = {
+  supabase,
+  mapUserFields,
+  mapNoteFields
+};
