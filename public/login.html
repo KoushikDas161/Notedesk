@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log In or Register — NoteDesk</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="brand"><span class="brand-mark">nd</span><span class="brand-text">NoteDesk</span></a>
+    <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"><span></span></button>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="browse.html">Browse Notes</a></li>
+      <li><a href="upload.html">Upload</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+    </ul>
+    <div class="nav-actions" data-auth-slot>
+      <a href="login.html" class="btn btn-ghost btn-sm">Log in</a>
+      <a href="upload.html" class="btn btn-primary btn-sm"><span class="long">+ Upload a note</span><span class="short" aria-hidden="true">+</span></a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section class="auth-wrap">
+    <div class="container" style="max-width:460px;">
+      <div class="form-card">
+        <div class="auth-tabs">
+          <button class="active" data-tab="login" type="button">Log in</button>
+          <button data-tab="register" type="button">Register</button>
+        </div>
+
+        <div class="auth-panel active" id="panel-login">
+          <form id="loginForm" novalidate>
+            <div class="form-row">
+              <label for="loginEmail">Email</label>
+              <input type="email" id="loginEmail" placeholder="you@university.edu">
+              <div class="field-error">Enter a valid email address.</div>
+            </div>
+            <div class="form-row">
+              <label for="loginPassword">Password</label>
+              <input type="password" id="loginPassword" placeholder="••••••••">
+              <div class="field-error">Enter your password.</div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Log in</button>
+            <p class="hint" style="text-align:center; margin-top:0.8rem;">Real accounts — passwords are hashed with bcrypt and checked against the server.</p>
+          </form>
+        </div>
+
+        <div class="auth-panel" id="panel-register">
+          <form id="registerForm" novalidate>
+            <div class="form-row">
+              <label for="regName">Full name</label>
+              <input type="text" id="regName" placeholder="Your name">
+              <div class="field-error">Enter your name.</div>
+            </div>
+            <div class="form-row">
+              <label for="regEmail">Email</label>
+              <input type="email" id="regEmail" placeholder="you@university.edu">
+              <div class="field-error">Enter a valid email address.</div>
+            </div>
+            <div class="form-row">
+              <label for="regPassword">Password</label>
+              <input type="password" id="regPassword" placeholder="At least 6 characters">
+              <div class="field-error">Password must be at least 6 characters.</div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Create account</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>A student coursework project.</span>
+      <span>web development</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  // If already logged in, skip straight to the dashboard
+  try{
+    const existing = await Api.getMe();
+    if (existing){ window.location.href = "dashboard.html"; return; }
+  }catch(err){
+    NSApp.showToast(err.message);
+  }
+
+  const tabs = document.querySelectorAll(".auth-tabs button");
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      tabs.forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      document.querySelectorAll(".auth-panel").forEach(p => p.classList.remove("active"));
+      document.getElementById("panel-" + tab.dataset.tab).classList.add("active");
+    });
+  });
+
+  function setFieldError(row, show){ row.classList.toggle("error", show); }
+
+  document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const emailRow = document.getElementById("loginEmail").closest(".form-row");
+    const passRow = document.getElementById("loginPassword").closest(".form-row");
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
+
+    const emailValid = /\S+@\S+\.\S+/.test(email);
+    setFieldError(emailRow, !emailValid);
+    setFieldError(passRow, !password);
+    if (!emailValid || !password) return;
+
+    const submitBtn = e.target.querySelector("button[type=submit]");
+    submitBtn.disabled = true;
+    try{
+      await Api.login(email, password);
+      NSApp.showToast("Logged in — redirecting to your dashboard");
+      setTimeout(() => window.location.href = "dashboard.html", 500);
+    }catch(err){
+      NSApp.showToast(err.message);
+      setFieldError(passRow, true);
+      submitBtn.disabled = false;
+    }
+  });
+
+  document.getElementById("registerForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const nameRow = document.getElementById("regName").closest(".form-row");
+    const emailRow = document.getElementById("regEmail").closest(".form-row");
+    const passRow = document.getElementById("regPassword").closest(".form-row");
+    const name = document.getElementById("regName").value.trim();
+    const email = document.getElementById("regEmail").value.trim();
+    const password = document.getElementById("regPassword").value;
+
+    const emailValid = /\S+@\S+\.\S+/.test(email);
+    setFieldError(nameRow, !name);
+    setFieldError(emailRow, !emailValid);
+    setFieldError(passRow, password.length < 6);
+    if (!name || !emailValid || password.length < 6) return;
+
+    const submitBtn = e.target.querySelector("button[type=submit]");
+    submitBtn.disabled = true;
+    try{
+      await Api.register(name, email, password);
+      NSApp.showToast("Account created — welcome to NoteDesk");
+      setTimeout(() => window.location.href = "dashboard.html", 500);
+    }catch(err){
+      NSApp.showToast(err.message);
+      setFieldError(emailRow, true);
+      submitBtn.disabled = false;
+    }
+  });
+});
+</script>
+</body>
+</html>

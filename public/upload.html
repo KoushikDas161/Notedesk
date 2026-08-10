@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload a Note — NoteDesk</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="brand"><span class="brand-mark">nd</span><span class="brand-text">NoteDesk</span></a>
+    <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"><span></span></button>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="browse.html">Browse Notes</a></li>
+      <li><a href="upload.html" class="active">Upload</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+    </ul>
+    <div class="nav-actions" data-auth-slot>
+      <a href="login.html" class="btn btn-ghost btn-sm">Log in</a>
+      <a href="upload.html" class="btn btn-primary btn-sm"><span class="long">+ Upload a note</span><span class="short" aria-hidden="true">+</span></a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section class="section">
+    <div class="container">
+      <div style="text-align:center; margin-bottom:var(--space-3);">
+        <span class="eyebrow">Contribute</span>
+        <h1>Upload a note</h1>
+        <p class="lead" style="margin:0 auto;">Two minutes now could save someone hours later. Fill in the details below.</p>
+      </div>
+
+      <div class="form-card" id="authGate" style="display:none; text-align:center;">
+        <h2 style="font-size:1.3rem;">Log in to upload a note</h2>
+        <p>Uploads are tied to your account and saved for real — log in first.</p>
+        <a href="login.html" class="btn btn-primary">Log in or register</a>
+      </div>
+
+      <div id="uploadFormWrap" style="display:none;">
+        <form class="form-card" id="uploadForm" novalidate>
+          <div class="form-success" id="formSuccess"></div>
+
+          <div class="form-row">
+            <label for="noteTitle">Note title</label>
+            <input type="text" id="noteTitle" placeholder="e.g. Data Structures — Trees & Graphs Cheat Sheet">
+            <div class="field-error">Give your note a clear title.</div>
+          </div>
+
+          <div class="form-row">
+            <label for="noteDesc">Description</label>
+            <textarea id="noteDesc" rows="3" placeholder="What does this note cover? Who is it useful for?"></textarea>
+            <div class="field-error">Add a short description so students know what's inside.</div>
+          </div>
+
+          <div class="two-col">
+            <div class="form-row">
+              <label for="noteSubject">Subject</label>
+              <select id="noteSubject"></select>
+              <div class="field-error">Choose a subject.</div>
+            </div>
+            <div class="form-row">
+              <label for="noteCourse">Course / class code</label>
+              <input type="text" id="noteCourse" placeholder="e.g. CS201">
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="form-row">
+              <label for="noteCategory">Category</label>
+              <select id="noteCategory"></select>
+              <div class="field-error">Choose a category.</div>
+            </div>
+            <div class="form-row">
+              <label for="noteType">File type</label>
+              <select id="noteType"></select>
+              <div class="field-error">Choose a file type.</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label for="noteTags">Tags</label>
+            <input type="text" id="noteTags" placeholder="comma-separated, e.g. algorithms, trees, final-exam">
+            <div class="hint">Tags help other students find this note through search.</div>
+          </div>
+
+          <div class="form-row">
+            <label>File</label>
+            <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Choose a file to upload">
+              <p style="margin:0; font-weight:600;">Drag a file here, or click to browse</p>
+              <p style="margin:0.3rem 0 0; font-size:0.82rem;">PDF, DOCX, JPG, or PNG — up to 20MB. PDF/JPG/PNG can be previewed right in the browser afterward.</p>
+              <div class="file-chosen" id="fileChosen"></div>
+            </div>
+            <input type="file" id="noteFile" style="display:none;" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+            <div class="field-error">Attach a file to upload — PDF, image, or document.</div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">Upload note</button>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>A student coursework project.</span>
+      <span>web development</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+<script src="js/upload.js"></script>
+</body>
+</html>

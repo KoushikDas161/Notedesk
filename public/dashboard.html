@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — NoteDesk</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="brand"><span class="brand-mark">nd</span><span class="brand-text">NoteDesk</span></a>
+    <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"><span></span></button>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="browse.html">Browse Notes</a></li>
+      <li><a href="upload.html">Upload</a></li>
+      <li><a href="dashboard.html" class="active">Dashboard</a></li>
+    </ul>
+    <div class="nav-actions" data-auth-slot>
+      <a href="login.html" class="btn btn-ghost btn-sm">Log in</a>
+      <a href="upload.html" class="btn btn-primary btn-sm"><span class="long">+ Upload a note</span><span class="short" aria-hidden="true">+</span></a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section class="section">
+    <div class="container">
+
+      <div class="form-card" id="authGate" style="display:none; text-align:center;">
+        <h2 style="font-size:1.3rem;">Log in to see your dashboard</h2>
+        <p>Your uploads, saves, and recently viewed notes are tied to your real account.</p>
+        <a href="login.html" class="btn btn-primary">Log in or register</a>
+      </div>
+
+      <div id="dashboardWrap" style="display:none;">
+        <span class="eyebrow">Your desk</span>
+        <h1 id="greeting">Your dashboard</h1>
+
+        <div class="stat-row">
+          <div class="stat-box"><div class="num" id="statUploads">0</div><div class="label">Uploaded</div></div>
+          <div class="stat-box"><div class="num" id="statSaved">0</div><div class="label">Saved</div></div>
+          <div class="stat-box"><div class="num" id="statRecent">0</div><div class="label">Recently viewed</div></div>
+          <div class="stat-box"><div class="num" id="statViews">0</div><div class="label">Views on your notes</div></div>
+        </div>
+
+        <div class="dash-layout">
+          <nav class="dash-nav" id="dashNav">
+            <button class="active" data-panel="uploads">My uploaded notes</button>
+            <button data-panel="saved">Saved notes</button>
+            <button data-panel="recent">Recently viewed</button>
+            <button data-panel="recommended">Recommended for you</button>
+          </nav>
+
+          <div>
+            <div class="dash-panel active" id="panel-uploads">
+              <div class="section-head"><h2>My uploaded notes</h2></div>
+              <div class="note-grid" id="uploadsGrid"></div>
+            </div>
+
+            <div class="dash-panel" id="panel-saved">
+              <div class="section-head"><h2>Saved notes</h2></div>
+              <div class="note-grid" id="savedGrid"></div>
+            </div>
+
+            <div class="dash-panel" id="panel-recent">
+              <div class="section-head"><h2>Recently viewed</h2></div>
+              <div class="note-grid" id="recentGrid"></div>
+            </div>
+
+            <div class="dash-panel" id="panel-recommended">
+              <div class="section-head"><h2>Recommended for you</h2></div>
+              <p class="hint" style="color:var(--ink-soft); font-size:0.85rem; margin-top:-0.6rem;">Based on subjects you've viewed or saved most.</p>
+              <div class="note-grid" id="recommendedGrid"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>A student coursework project.</span>
+      <span>web development</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const authGate = document.getElementById("authGate");
+  const wrap = document.getElementById("dashboardWrap");
+
+  let user = null;
+  try{
+    user = await Api.getMe();
+  }catch(err){
+    NSApp.showToast(err.message);
+  }
+
+  if (!user){
+    authGate.style.display = "block";
+    wrap.style.display = "none";
+    return;
+  }
+  authGate.style.display = "none";
+  wrap.style.display = "block";
+  document.getElementById("greeting").textContent = `Welcome back, ${user.name.split(" ")[0]}`;
+
+  let data;
+  try{
+    data = await Api.getDashboard();
+  }catch(err){
+    wrap.innerHTML = `<div class="empty-state"><h3>Couldn't load your dashboard</h3><p>${err.message}</p></div>`;
+    return;
+  }
+
+  NSApp.renderNoteGrid(document.getElementById("uploadsGrid"), data.uploaded, "You haven't uploaded any notes yet.");
+  NSApp.renderNoteGrid(document.getElementById("savedGrid"), data.saved, "Save notes while browsing to find them here.");
+  NSApp.renderNoteGrid(document.getElementById("recentGrid"), data.recent, "Notes you open will show up here.");
+  NSApp.renderNoteGrid(document.getElementById("recommendedGrid"), data.recommended, "Browse a few notes and we'll start recommending more.");
+
+  document.getElementById("statUploads").textContent = data.stats.uploads;
+  document.getElementById("statSaved").textContent = data.stats.saved;
+  document.getElementById("statRecent").textContent = data.stats.recent;
+  document.getElementById("statViews").textContent = data.stats.viewsOnUploads;
+
+  const navButtons = document.querySelectorAll("#dashNav button");
+  navButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      navButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      document.querySelectorAll(".dash-panel").forEach(p => p.classList.remove("active"));
+      document.getElementById("panel-" + btn.dataset.panel).classList.add("active");
+    });
+  });
+});
+</script>
+</body>
+</html>

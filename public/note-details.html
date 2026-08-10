@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">Note Details — NoteDesk</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="brand"><span class="brand-mark">nd</span><span class="brand-text">NoteDesk</span></a>
+    <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"><span></span></button>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="browse.html">Browse Notes</a></li>
+      <li><a href="upload.html">Upload</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+    </ul>
+    <div class="nav-actions" data-auth-slot>
+      <a href="login.html" class="btn btn-ghost btn-sm">Log in</a>
+      <a href="upload.html" class="btn btn-primary btn-sm"><span class="long">+ Upload a note</span><span class="short" aria-hidden="true">+</span></a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section class="section">
+    <div class="container" id="noteDetailsRoot">
+      <p>Loading note…</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0;">
+    <div class="container">
+      <div class="section-head">
+        <h2>Related notes</h2>
+      </div>
+      <div class="note-grid" id="relatedGrid"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>A student coursework project.</span>
+      <span>web development</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
+  const root = document.getElementById("noteDetailsRoot");
+  const relatedGrid = document.getElementById("relatedGrid");
+
+  function notFoundHTML(){
+    return `
+      <div class="empty-state">
+        <h3>We couldn't find that note</h3>
+        <p>It may have been removed, or the link is incorrect.</p>
+        <a href="browse.html" class="btn btn-primary" style="margin-top:1rem;">Browse all notes</a>
+      </div>`;
+  }
+
+  if (!id){
+    root.innerHTML = notFoundHTML();
+    return;
+  }
+
+  let note;
+  try{
+    note = await Api.getNote(id);
+  }catch(err){
+    root.innerHTML = `<div class="empty-state"><h3>Couldn't load this note</h3><p>${err.message}</p></div>`;
+    return;
+  }
+
+  document.getElementById("pageTitle").textContent = note.title + " — NoteDesk";
+
+  const initials = note.authorName.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+
+  // Build the preview pane: real inline PDF/image viewing when a file exists,
+  // a friendly message for file types the browser can't render, and a
+  // "sample data" note for the 12 seed notes that never had a real file.
+  let previewHTML;
+  const ext = note.originalName ? note.originalName.split(".").pop().toLowerCase() : "";
+  if (!note.filename){
+    previewHTML = `<div>Sample data — ${note.type}, no file was ever attached</div>`;
+  } else if (["jpg", "jpeg", "png"].includes(ext)){
+    previewHTML = `<img src="${Api.viewUrl(note.id)}" alt="${note.title}">`;
+  } else if (ext === "pdf"){
+    previewHTML = `<iframe src="${Api.viewUrl(note.id)}" title="${note.title}"></iframe>`;
+  } else {
+    previewHTML = `<div>Preview isn't available for .${ext} files in the browser — use Download instead.</div>`;
+  }
+
+  root.innerHTML = `
+    <div class="details-layout">
+      <div>
+        <span class="eyebrow">${note.subject} · ${note.course}</span>
+        <h1>${note.title}</h1>
+        <div class="details-card">
+          <div class="preview-pane">${previewHTML}</div>
+          <p>${note.description}</p>
+
+          <dl class="detail-meta-list">
+            <div><dt>Subject</dt><dd>${note.subject}</dd></div>
+            <div><dt>Course</dt><dd>${note.course}</dd></div>
+            <div><dt>Category</dt><dd>${note.category}</dd></div>
+            <div><dt>File type</dt><dd>${note.type}</dd></div>
+            <div><dt>Uploaded</dt><dd>${NSApp.formatDate(note.date)}</dd></div>
+            <div><dt>Views</dt><dd>${NSApp.formatNumber(note.views)}</dd></div>
+          </dl>
+
+          <div class="tag-input-row">
+            ${(note.tags || []).map(t => `<span class="tag-chip">#${t}</span>`).join("")}
+          </div>
+
+          <div class="action-row">
+            ${note.filename ? `<a class="btn btn-ghost" href="${Api.viewUrl(note.id)}" target="_blank" rel="noopener">Open in new tab</a>` : ""}
+            <a class="btn btn-primary" id="downloadBtn" href="${Api.downloadUrl(note.id)}">⬇ Download</a>
+            <button class="btn ${note.saved ? "btn-danger" : "btn-ghost"}" id="saveBtn" data-save="${note.id}">
+              ${note.saved ? "★ Saved" : "☆ Save for later"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <aside>
+        <div class="sidebar-card">
+          <h3 style="font-size:1rem;">Uploaded by</h3>
+          <div class="uploader-row">
+            <div class="avatar">${initials}</div>
+            <div>
+              <strong>${note.authorName}</strong>
+              <div style="font-size:0.8rem; color:var(--ink-soft);">${NSApp.formatDate(note.date)}</div>
+            </div>
+          </div>
+          <p style="font-size:0.85rem;">Thanks this student for helping the class — leave a save if it helped you.</p>
+        </div>
+
+        <div class="sidebar-card">
+          <h3 style="font-size:1rem;">At a glance</h3>
+          <div class="stat-row" style="grid-template-columns:1fr 1fr; margin-bottom:0;">
+            <div class="stat-box"><div class="num">${NSApp.formatNumber(note.views)}</div><div class="label">Views</div></div>
+            <div class="stat-box"><div class="num">${NSApp.formatNumber(note.downloads)}</div><div class="label">Downloads</div></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  `;
+
+  document.getElementById("downloadBtn").addEventListener("click", (e) => {
+    if (!note.filename){
+      e.preventDefault();
+      NSApp.showToast("This is sample data — no real file is attached to download.");
+    }
+  });
+
+  NSApp.wireSaveButtons(root);
+
+  try{
+    const related = (await Api.getNotes({ subject: note.subject })).filter(n => n.id !== note.id).slice(0, 4);
+    NSApp.renderNoteGrid(relatedGrid, related, "No other notes in this subject yet.");
+  }catch(err){
+    relatedGrid.innerHTML = `<p style="color:var(--correction);">${err.message}</p>`;
+  }
+});
+</script>
+</body>
+</html>

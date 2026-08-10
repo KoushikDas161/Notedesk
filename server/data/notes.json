@@ -1,0 +1,259 @@
+[
+  {
+    "id": "n001",
+    "title": "Data Structures — Trees & Graphs Cheat Sheet",
+    "subject": "Computer Science",
+    "course": "CS201",
+    "category": "Exam Prep",
+    "type": "PDF",
+    "tags": [
+      "data-structures",
+      "trees",
+      "graphs",
+      "algorithms"
+    ],
+    "authorId": null,
+    "authorName": "Maya Chen",
+    "date": "2026-06-28",
+    "views": 1242,
+    "downloads": 412,
+    "description": "Concise diagrams and complexity tables for BSTs, heaps, tries, and common graph traversal algorithms (BFS/DFS/Dijkstra).",
+    "filename": null,
+    "originalName": null
+  },
+  {
+    "id": "n002",
+    "title": "Machine Learning — Gradient Descent Explained",
+    "subject": "Computer Science",
+    "course": "CS404",
+    "category": "Lecture Notes",
+    "type": "Slides",
+    "tags": [
+      "machine-learning",
+      "gradient-descent",
+      "cost-function"
+    ],
+    "authorId": null,
+    "authorName": "Rahim Uddin",
+    "date": "2026-07-01",
+    "views": 981,
+    "downloads": 301,
+    "description": "Step-by-step derivation of gradient descent for linear regression, with worked cost-function examples and plots.",
+    "filename": null,
+    "originalName": null
+  },
+  {
+    "id": "n003",
+    "title": "Physics — Simple Harmonic Motion Summary",
+    "subject": "Physics",
+    "course": "PHY102",
+    "category": "Exam Prep",
+    "type": "Handwritten",
+    "tags": [
+      "shm",
+      "oscillation",
+      "waves"
+    ],
+    "authorId": null,
+    "authorName": "Farah Islam",
+    "date": "2026-05-14",
+    "views": 745,
+    "downloads": 220,
+    "description": "Handwritten summary covering restoring force, energy in SHM, and pendulum vs spring-mass comparisons.",
+    "filename": null,
+    "originalName": null
+  },
+  {
+    "id": "n004",
+    "title": "Database Systems — Final Review Pack",
+    "subject": "Computer Science",
+    "course": "CS310",
+    "category": "Exam Prep",
+    "type": "PDF",
+    "tags": [
+      "database",
+      "sql",
+      "normalization",
+      "final"
+    ],
+    "authorId": null,
+    "authorName": "Tariq Rahman",
+    "date": "2026-06-02",
+    "views": 1523,
+    "downloads": 588,
+    "description": "Normal forms, ER-to-relational mapping, transaction isolation levels, and 30 practice SQL queries with answers.",
+    "filename": null,
+    "originalName": null
+  },
+  {
+    "id": "n005",
+    "title": "Organic Chemistry — Reaction Mechanisms",
+    "subject": "Chemistry",
+    "course": "CHM220",
+    "category": "Lecture Notes",
+    "type": "PDF",
+    "tags": [
+      "organic-chemistry",
+      "mechanisms",
+      "SN1",
+      "SN2"
+    ],
+    "authorId": null,
+    "authorName": "Nusrat Jahan",
+    "date": "2026-04-20",
+    "views": 610,
+    "downloads": 175,
+    "description": "Arrow-pushing diagrams for SN1, SN2, elimination reactions with rate-determining step notes.",
+    "filename": null,
+    "originalName": null
+  },
+  {
+    "id": "n006",
+    "title": "Macroeconomics — Fiscal Policy Notes",
+    "subject": "Economics",
+    "course": "ECO101",
+    "category": "Lecture Notes",
+    "type": "Doc",
+    "tags": [
+      "macroeconomics",
+      "fiscal-policy",
+      "gdp"
+    ],
+    "authorId": null,
+    "authorName": "Imran Kabir",
+    "date": "2026-03-30",
+    "views": 402,
+    "downloads": 98,
+    "description": "Government spending, taxation, multiplier effects, and IS-LM model walkthrough with graphs.",
+    "filename": null,
+    "originalName": null
+  },
+  {
+    "id": "n007",
+    "title": "Linear Algebra — Eigenvalues & Eigenvectors",
+    "subject": "Mathematics",
+    "course": "MTH205",
+    "category": "Lecture Notes",
+    "type": "Handwritten",
+    "tags": [
+      "linear-algebra",
+      "eigenvalues",
+      "matrices"
+    ],
+    "authorId": null,
+    "authorName": "Maya Chen",
+    "date": "2026-07-05",
+    "views": 864,
+    "downloads": 260,
+    "description": "Diagonalization, characteristic polynomials, and applications to systems of differential equations.",
+    "filename": null,
+    "originalName": null
+  },
+  {
+    "id": "n008",
+    "title": "Operating Systems — Semaphores & Deadlock",
+    "subject": "Computer Science",
+    "course": "CS330",
+    "category": "Assignment Help",
+    "type": "PDF",
+    "tags": [
+      "operating-systems",
+      "semaphores",
+      "deadlock",
+      "concurrency"
+    ],
+    "authorId": null,
+    "authorName": "Rahim Uddin",
+    "date": "2026-06-18",
+    "views": 690,
+    "downloads": 210,
+    "description": "Readers-Writers and Dining Philosophers solutions with semaphore code and deadlock-avoidance discussion.",
+    "filename": null,
+    "originalName": null
+  },
+  {
+    "id": "n009",
+    "title": "Cell Biology — Mitosis vs Meiosis",
+    "subject": "Biology",
+    "course": "BIO110",
+    "category": "Exam Prep",
+    "type": "Slides",
+    "tags": [
+      "biology",
+      "mitosis",
+      "meiosis",
+      "cell-division"
+    ],
+    "authorId": null,
+    "authorName": "Farah Islam",
+    "date": "2026-02-11",
+    "views": 530,
+    "downloads": 140,
+    "description": "Side-by-side phase comparison, chromosome counts, and common exam diagram labels.",
+    "filename": null,
+    "originalName": null
+  },
+  {
+    "id": "n010",
+    "title": "World History — Causes of WWI Timeline",
+    "subject": "History",
+    "course": "HIS150",
+    "category": "Lecture Notes",
+    "type": "Doc",
+    "tags": [
+      "history",
+      "wwi",
+      "timeline"
+    ],
+    "authorId": null,
+    "authorName": "Tariq Rahman",
+    "date": "2026-01-25",
+    "views": 315,
+    "downloads": 77,
+    "description": "Alliance system, militarism, nationalism, and the July Crisis laid out as an annotated timeline.",
+    "filename": null,
+    "originalName": null
+  },
+  {
+    "id": "n011",
+    "title": "Statistics — Hypothesis Testing Quick Guide",
+    "subject": "Mathematics",
+    "course": "MTH220",
+    "category": "Exam Prep",
+    "type": "PDF",
+    "tags": [
+      "statistics",
+      "hypothesis-testing",
+      "p-value"
+    ],
+    "authorId": null,
+    "authorName": "Nusrat Jahan",
+    "date": "2026-06-09",
+    "views": 1105,
+    "downloads": 390,
+    "description": "Null vs alternative hypotheses, choosing a test, and reading p-values without the jargon.",
+    "filename": null,
+    "originalName": null
+  },
+  {
+    "id": "n012",
+    "title": "English Literature — Poetry Devices Glossary",
+    "subject": "Literature",
+    "course": "ENG104",
+    "category": "Assignment Help",
+    "type": "Handwritten",
+    "tags": [
+      "literature",
+      "poetry",
+      "literary-devices"
+    ],
+    "authorId": null,
+    "authorName": "Imran Kabir",
+    "date": "2026-05-02",
+    "views": 260,
+    "downloads": 64,
+    "description": "Metaphor, enjambment, caesura, and volta — defined with short annotated poem excerpts.",
+    "filename": null,
+    "originalName": null
+  }
+]

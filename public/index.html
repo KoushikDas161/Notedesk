@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NoteDesk — Find and share student notes</title>
+<meta name="description" content="NoteDesk is a student-focused platform to upload, discover, and share academic notes by subject and course.">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="brand"><span class="brand-mark">nd</span><span class="brand-text">NoteDesk</span></a>
+    <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"><span></span></button>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="browse.html">Browse Notes</a></li>
+      <li><a href="upload.html">Upload</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+    </ul>
+    <div class="nav-actions" data-auth-slot>
+      <a href="login.html" class="btn btn-ghost btn-sm">Log in</a>
+      <a href="upload.html" class="btn btn-primary btn-sm"><span class="long">+ Upload a note</span><span class="short" aria-hidden="true">+</span></a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">Built by students, for students</span>
+        <h1>All your <span class="mark">study notes</span>, in one desk.</h1>
+        <p class="lead">Stop losing good notes in group chats and camera rolls. Upload, tag, and discover course notes from students who've already taken your class.</p>
+
+        <form id="heroSearchForm" class="hero-search" role="search">
+          <label for="heroSearchInput" class="visually-hidden" style="position:absolute;left:-9999px;">Search notes</label>
+          <div class="search-bar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="heroSearchInput" placeholder="Try “Data Structures” or “Physics Chapter 3”">
+          </div>
+          <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+
+        <div class="hero-cta-row">
+          <a href="upload.html" class="btn btn-highlight">Upload your notes</a>
+          <a href="browse.html" class="btn btn-ghost">Browse everything</a>
+        </div>
+      </div>
+
+      <div class="desk" aria-hidden="true">
+        <div class="desk-card c1">
+          <span class="pin"></span>
+          <span class="tag-chip">Physics</span>
+          <h4>Simple Harmonic Motion</h4>
+          <div class="meta-line">Handwritten · 745 views</div>
+        </div>
+        <div class="desk-card c2">
+          <span class="pin"></span>
+          <span class="tag-chip">Computer Science</span>
+          <h4>Gradient Descent Explained</h4>
+          <div class="meta-line">Slides · 980 views</div>
+        </div>
+        <div class="desk-card c3">
+          <span class="pin"></span>
+          <span class="tag-chip">Mathematics</span>
+          <h4>Eigenvalues &amp; Eigenvectors</h4>
+          <div class="meta-line">Handwritten · 860 views</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Browse by subject</h2>
+        <a href="browse.html" class="see-all">See all subjects →</a>
+      </div>
+      <div class="category-row" id="categoryRow"><p style="color:var(--ink-soft);">Loading subjects…</p></div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0;">
+    <div class="container">
+      <div class="section-head">
+        <h2>Popular this month</h2>
+        <a href="browse.html" class="see-all">View all →</a>
+      </div>
+      <div class="note-grid" id="popularGrid"><p style="color:var(--ink-soft);">Loading notes…</p></div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0;">
+    <div class="container">
+      <div class="section-head">
+        <h2>Recently uploaded</h2>
+        <a href="browse.html" class="see-all">View all →</a>
+      </div>
+      <div class="note-grid" id="recentGrid"><p style="color:var(--ink-soft);">Loading notes…</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="form-card" style="text-align:center; max-width:720px;">
+        <span class="eyebrow">Have notes worth sharing?</span>
+        <h2>Your notes could save someone else's semester.</h2>
+        <p>It takes less than two minutes to upload — add a title, a subject, and the file. That's it.</p>
+        <a href="upload.html" class="btn btn-primary">Upload a note</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a href="index.html" class="brand"><span class="brand-mark">nd</span><span class="brand-text">NoteDesk</span></a>
+        <p style="margin-top:0.8rem; max-width:32ch;">A centralized place for students to find and share course notes.</p>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="browse.html">Browse notes</a></li>
+          <li><a href="upload.html">Upload notes</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Account</h4>
+        <ul>
+          <li><a href="login.html">Log in</a></li>
+          <li><a href="login.html">Register</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Subjects</h4>
+        <ul>
+          <li><a href="browse.html?subject=Computer%20Science">Computer Science</a></li>
+          <li><a href="browse.html?subject=Mathematics">Mathematics</a></li>
+          <li><a href="browse.html?subject=Physics">Physics</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>A student coursework project.</span>
+      <span>web development</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+<script src="js/search.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    const categoryRow = document.getElementById("categoryRow");
+    const popularGrid = document.getElementById("popularGrid");
+    const recentGrid = document.getElementById("recentGrid");
+
+    try{
+      const meta = await Api.getNoteMeta();
+      categoryRow.innerHTML = meta.subjects.map(s =>
+        `<a class="category-pill" href="browse.html?subject=${encodeURIComponent(s)}">${s}</a>`
+      ).join("");
+    }catch(err){
+      categoryRow.innerHTML = `<p style="color:var(--correction);">${err.message}</p>`;
+    }
+
+    try{
+      const popular = await Api.getNotes({ sort: "popular" });
+      NSApp.renderNoteGrid(popularGrid, popular.slice(0, 4));
+    }catch(err){
+      popularGrid.innerHTML = `<p style="color:var(--correction);">${err.message}</p>`;
+    }
+
+    try{
+      const recent = await Api.getNotes({ sort: "recent" });
+      NSApp.renderNoteGrid(recentGrid, recent.slice(0, 4));
+    }catch(err){
+      recentGrid.innerHTML = `<p style="color:var(--correction);">${err.message}</p>`;
+    }
+  });
+</script>
+</body>
+</html>
