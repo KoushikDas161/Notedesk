@@ -1,7 +1,7 @@
 /* =========================================================
    NOTES ROUTES — /api/notes/*
    Real persistence (Supabase) and real file storage (Supabase Storage)
-   with Multer memory storage.
+   with Multer memory storage and image compression (sharp).
 
    Two ways to read an uploaded file back:
    - GET /:id/view      → streams inline (renders in the browser: PDF/JPG/PNG)
@@ -11,6 +11,8 @@
 const express = require("express");
 const multer = require("multer");
 const path = require("path");
+const sharp = require("sharp");
+const zlib = require("zlib");
 const { supabase, mapUserFields, mapNoteFields } = require("../data/db");
 const { requireAuth } = require("../middleware/auth");
 
@@ -23,7 +25,7 @@ const INLINE_VIEWABLE_EXT = [".pdf", ".jpg", ".jpeg", ".png"]; // browsers can r
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
-  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit to save storage space
   fileFilter: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
     if (!ALLOWED_EXT.includes(ext)){
@@ -101,17 +103,26 @@ router.get("/:id", async (req, res, next) => {
     if (queryError) return next(queryError);
     if (!note) return res.status(404).json({ error: "Note not found." });
 
-    // Increment views
-    const { data: updatedNote, error: updateError } = await supabase
-      .from("notes")
-      .update({ views: (note.views || 0) + 1 })
-      .eq("id", req.params.id)
-      .select()
-      .single();
-
-    if (updateError) return next(updateError);
-
     const currentUser = await getCurrentUser(req);
+    const isAuthor = currentUser && currentUser.id === note.author_id;
+
+    req.session.viewedNoteIds = req.session.viewedNoteIds || [];
+    const alreadyViewed = req.session.viewedNoteIds.includes(note.id);
+
+    let updatedNote = note;
+    if (!isAuthor && !alreadyViewed) {
+      const { data: incNote, error: updateError } = await supabase
+        .from("notes")
+        .update({ views: (note.views || 0) + 1 })
+        .eq("id", req.params.id)
+        .select()
+        .single();
+
+      if (updateError) return next(updateError);
+      updatedNote = incNote;
+      req.session.viewedNoteIds.push(note.id);
+    }
+
     if (currentUser){
       const recentIds = [note.id, ...currentUser.recentNoteIds.filter(id => id !== note.id)].slice(0, 8);
       const { error: userUpdateError } = await supabase
@@ -150,13 +161,44 @@ router.post("/", requireAuth, (req, res) => {
       if (userError) return res.status(400).json({ error: userError.message });
       const user = mapUserFields(dbUser);
 
-      // Generate a unique filename and upload to Supabase Storage
+      // Perform image compression using sharp to save storage space
+      let fileBuffer = req.file.buffer;
       const safeExt = path.extname(req.file.originalname).toLowerCase();
+      const isImage = [".jpg", ".jpeg", ".png"].includes(safeExt);
+
+      if (isImage) {
+        try {
+          let sharpInstance = sharp(req.file.buffer).resize({
+            width: 1600,
+            height: 1600,
+            fit: "inside",
+            withoutEnlargement: true
+          });
+
+          if (safeExt === ".png") {
+            sharpInstance = sharpInstance.png({ compressionLevel: 8 });
+          } else {
+            sharpInstance = sharpInstance.jpeg({ quality: 75 });
+          }
+
+          fileBuffer = await sharpInstance.toBuffer();
+        } catch (compressError) {
+          console.error("Image compression failed, using original file:", compressError);
+        }
+      } else {
+        try {
+          fileBuffer = zlib.gzipSync(req.file.buffer);
+        } catch (gzipError) {
+          console.error("Document compression failed, using original file:", gzipError);
+        }
+      }
+
+      // Generate a unique filename and upload to Supabase Storage
       const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${safeExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("notes")
-        .upload(filename, req.file.buffer, {
+        .upload(filename, fileBuffer, {
           contentType: req.file.mimetype,
           duplex: "half"
         });
@@ -263,7 +305,14 @@ router.get("/:id/view", async (req, res) => {
       return res.status(404).json({ error: "File missing from storage." });
     }
 
-    const buffer = Buffer.from(await fileData.arrayBuffer());
+    let buffer = Buffer.from(await fileData.arrayBuffer());
+    if (buffer.length >= 2 && buffer[0] === 0x1f && buffer[1] === 0x8b) {
+      try {
+        buffer = zlib.gunzipSync(buffer);
+      } catch (gunzipError) {
+        console.error("Gunzip decompression failed:", gunzipError);
+      }
+    }
     res.setHeader("Content-Type", fileData.type || "application/octet-stream");
     res.setHeader("Content-Disposition", `inline; filename="${note.original_name || note.filename}"`);
     res.send(buffer);
@@ -301,7 +350,14 @@ router.get("/:id/download", async (req, res, next) => {
 
     if (updateError) return next(updateError);
 
-    const buffer = Buffer.from(await fileData.arrayBuffer());
+    let buffer = Buffer.from(await fileData.arrayBuffer());
+    if (buffer.length >= 2 && buffer[0] === 0x1f && buffer[1] === 0x8b) {
+      try {
+        buffer = zlib.gunzipSync(buffer);
+      } catch (gunzipError) {
+        console.error("Gunzip decompression failed:", gunzipError);
+      }
+    }
     res.setHeader("Content-Type", fileData.type || "application/octet-stream");
     res.setHeader("Content-Disposition", `attachment; filename="${note.original_name || note.filename}"`);
     res.send(buffer);

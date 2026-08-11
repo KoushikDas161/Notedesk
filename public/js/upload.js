@@ -111,7 +111,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!fileInput.files.length){
       setFieldError(fileRow, "Attach a file to upload — PDF, image, or document.");
       valid = false;
-    } else clearFieldError(fileRow);
+    } else {
+      const file = fileInput.files[0];
+      if (file.size > 10 * 1024 * 1024) {
+        setFieldError(fileRow, "File size must be less than 10MB.");
+        valid = false;
+      } else {
+        clearFieldError(fileRow);
+      }
+    }
     return valid;
   }
 

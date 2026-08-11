@@ -58,7 +58,11 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).send("Something went wrong.");
 });
 
-app.listen(PORT, () => {
-  console.log(`NoteDesk server running at http://localhost:${PORT}`);
-  console.log(`Open that exact URL in your browser — opening the HTML files directly will not work.`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`NoteDesk server running at http://localhost:${PORT}`);
+    console.log(`Open that exact URL in your browser — opening the HTML files directly will not work.`);
+  });
+}
+
+module.exports = app;
