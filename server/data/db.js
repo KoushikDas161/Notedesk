@@ -1,7 +1,7 @@
 /* =========================================================
-   DB.JS — Supabase persistence layer
-   Stands in for a real database (Supabase). Connects using the
-   service_role key to bypass RLS for server-side operations.
+   DB.JS — Supabase Database Connection
+   Connects to Supabase using the service_role key to bypass RLS 
+   for administrative backend operations.
    ========================================================= */
 
 require("dotenv").config();
