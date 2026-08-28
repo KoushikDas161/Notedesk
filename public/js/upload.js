@@ -42,10 +42,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const submitBtn = form.querySelector("button[type=submit]");
 
   try{
-    const meta = await Api.getNoteMeta();
-    fillSelect(subjectInput, meta.subjects, "Select a subject");
-    fillSelect(categoryInput, meta.categories, "Select a category");
-    fillSelect(typeInput, meta.types, "Select a file type");
+    // const meta = await Api.getNoteMeta();
+    // fillSelect(subjectInput, meta.subjects, "Select a subject");
+    // fillSelect(categoryInput, meta.categories, "Select a category");
+    // fillSelect(typeInput, meta.types, "Select a file type");
   }catch(err){
     NSApp.showToast(err.message);
   }
